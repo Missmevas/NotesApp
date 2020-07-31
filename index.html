@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Notes app</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+        <link rel="stylesheet" href="index.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+        <script src="pouchdb-7.2.1.min.js"></script>
+        <script src="../node_modules/pouchdb/dist/pouchdb.js"></script>
+        <script src="./notes.js"></script>
+
+        <link rel="icon" href="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fs-media-cache-ak0.pinimg.com%2Foriginals%2F8b%2Fd2%2F07%2F8bd207881882ab8fe4a8f7b69c1331f8.png&f=1&nofb=1">
+
+    </head>
+
+
+    <body>
+
+
+
+        <div class="bd-example">
+
+            <div class="row ">
+                <div class="col-3">
+                    <button type="button" class="btn btn-info btn-lg btn-note" data-toggle="modal" data-target="#addNote">New note</button>
+                </div>
+
+                <div class="col-9">
+                    <h5 id="created"></h5>
+                </div>
+            </div>
+
+            <div class="row">
+
+                <div class="col-3 notes_left">
+                    <div id="list-example" class="list-group">
+
+
+                    </div>
+                </div>
+
+                <div class="col-9 notes_right">
+
+                    <h3 id="note-title"></h3>
+
+                    <p id="note-content"></p>
+                    <button class='btn btn-edit' id="edit" data-toggle="modal" data-target="#editNote"><img src='https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2F0%2F0f%2FAntu_document-edit-sign.svg%2F120px-Antu_document-edit-sign.svg.png&f=1&nofb=1' width='80' alt='button' /></button>
+
+
+                </div>
+            </div>
+
+            <div id="addNote" class="modal fade" role="dialog">
+                <div class="modal-dialog">
+
+                    <!-- Modal content-->
+                    <div class="modal-content">
+                        <div class="modal-header">
+
+                            <h4 class="modal-title">Add a new note</h4>
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <form onsubmit="addNote()">
+
+                                <div class="form-group">
+                                    <label for="note_content">Note:</label>
+                                    <textarea class="form-control" rows="8" id="note_content" placeholder="What's up?" required></textarea>
+                                </div>
+                            </form> 
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-warning" data-dismiss="modal" onclick="addNote()">Add</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div id="editNote" class="modal fade" role="dialog">
+                <div class="modal-dialog">
+
+                    <!-- Modal content-->
+                    <div class="modal-content">
+                        <div class="modal-header">
+
+                            <h4 class="modal-title">Edit the note</h4>
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <form onsubmit="editNote()">
+
+                                <div class="form-group">
+                                    <label for="note_content2">Note:</label>
+                                    <textarea class="form-control" rows="8" id="note_content2" placeholder="" required></textarea>
+                                </div>
+                            </form> 
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-warning" data-dismiss="modal" onclick="editNote()">Confirm changes</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script>
+
+            var dict = {}; //dictionary storing data from the db
+            var db = new PouchDB('notes'); //create DB
+            load(); //load notes from PouchDB
+
+            $('body').on('click', '#list-example a', function () {
+                var $el = $(this);
+                var id = $(this).attr('id');
+                displayNote(id); 
+            });
+
+            $(document).on("click", ".btn-edit", function () {
+                var note_content = $("#note-content").text();
+                $("#editNote #note_content2").val( note_content );
+
+            });
+
+
+
+            function timeConverter(UNIX_timestamp){
+                var a = new Date(UNIX_timestamp);
+                var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                var year = a.getFullYear();
+                var month = months[a.getMonth()];
+                var day = a.getDate();
+                var hour = a.getHours();
+                var min = (a.getMinutes() < 10? '0' : '') + a.getMinutes();
+
+
+                var time = day + " " + month + ", " + hour + ":" + min ;
+                return time;
+            }
+
+            function load()
+            {
+
+                dict={}
+                db.allDocs({include_docs: true}, function(err, docs) {
+
+                    if (err) {
+                        return console.log(err);
+                    } else {
+                        for (x in docs.rows)
+                        {
+
+                            dict[docs.rows[x].doc.created] = [docs.rows[x].doc.content, docs.rows[x].doc.created, docs.rows[x].doc.last_edited]
+
+
+                        }
+
+                        updateNavbar(dict);
+
+                    }
+                });
+
+            }
+
+
+
+            function displayNote(key)
+            {
+                try
+                {
+
+                    var title = dict[key][0].split('.')[0];
+                    $('.notes_right h3').text(title);
+                    $('.notes_right p').text(dict[key][0].replace(title+".", ""));
+                    $('#created').text("Created " + timeConverter(Number(key))); //update top header "Created ..."
+                    $(".btn-edit").attr("id", key); //pass ID of the note -> button -> modal 
+                }
+
+                catch(err)
+                {
+                    alert("Note cannot be displayed");
+                }
+
+            }
+
+            function getKeyByValue(object, value)
+            {
+                return Object.keys(object).find(key => object[key][2] === value);
+            }
+
+            function sortOnKeys(dict) {
+
+                var sorted = [];
+                var iter = 0;
+                for(var key in dict) {
+                    sorted[iter] = Number(dict[key][2]); //sort plain edit times
+                    iter+=1;
+                }
+                sorted.sort().reverse();
+
+                var temp = {};
+                for(var i = 0; i < sorted.length; i++) { //find keys of entries with this edit time
+
+                    var key = getKeyByValue(dict, sorted[i]);
+                    temp[key] = dict[key];
+
+                }
+
+                return temp;
+            }
+
+
+            function updateNavbar(dict)
+            {
+                dict = sortOnKeys(dict); //sort by date & time
+
+                for (key in dict)
+                {
+                    var header = dict[key][0].split('.')[0]; // note content
+                    var created = dict[key][1];
+                    var date = dict[key][2]; // last_edited
+
+
+                    if(header.length>50)
+                    {
+                        header= header.substring(0,50) + " (...)";
+                    }
+
+                    $( "#list-example" ).append( "<a class='list-group-item list-group-item-action' id = '"+created+"' ref='#list-item-1' role='button'>"+header+ "<p id='list-example_date'>"+timeConverter(date)+"</p></button></a>" );
+                }
+            }
+
+
+            function editNote()
+            {
+
+                var d = new Date();
+                var n = d.getTime();
+                var id =  $(".btn-edit").attr("id");
+
+
+                db.get(id).then(function (doc) {
+
+
+                    doc.rev = doc.rev,
+                        doc.content = document.getElementById('note_content2').value
+                    doc.last_edited = n
+
+                    return db.put(doc);
+                });
+
+
+            }
+
+            function addNote()
+            {
+
+                var d = new Date();
+                var n = d.getTime();
+
+                doc = {
+                    _id : String(n), //timestamp will be an id
+                    content: document.getElementById('note_content').value,
+                    created: n,
+                    last_edited : n
+                }
+
+
+                db.put(doc, function(err, response) {
+                    if (err) 
+                    {
+                        alert("There has been a problem with adding your note");
+                    } 
+                    else 
+                    {
+                        $('#note_content').empty();
+                    }
+                });
+
+            }
+
+            //asynchronous function reacting to changes in the DB
+            db.changes({live: true, since: 'now', include_docs: true}).on('change', function (change) {
+
+
+                $( "#list-example" ).empty();
+                load();
+
+            }).on('error', console.log.bind(console));
+
+        </script>
+
+    </body>
+</html>

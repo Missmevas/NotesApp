@@ -1,0 +1,81 @@
+#created
+{
+    text-align: right;
+    margin-right: -10px;
+}
+
+.btn-edit
+{
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+}
+
+
+#list-example > a:hover {
+  background-color: aliceblue;
+}
+
+#list-example > a.selected
+{
+    background-color: yellow;
+}
+
+#list-example_date
+{
+    font-size: 0.9em;
+    color: grey;
+    font-style: italic;
+    font-weight: 200;
+}
+
+.list-group-item
+{
+    padding-right: 10px;
+    font-size: 1.1em;
+}
+
+.modal-title
+{
+    text-align: left;
+}
+
+
+.bd-example
+{
+    position: relative;
+    padding: 1.5rem;
+    margin-right: 5vw;
+    margin-top: 2vh;
+    margin-left: 0;
+    box-sizing: border-box;
+    border-width: .2rem;
+}
+
+.btn-note
+{
+    margin-bottom: 4vh;
+}
+
+.notes_left
+{
+    overflow-y: scroll;
+    height:70vh;
+}
+.note_input
+{
+    height: 25vh;
+}
+
+.notes_right
+{
+    width: 100%;
+    height:70vh;
+    overflow-y: scroll;
+    padding-right: 15px;
+    padding-left: 2vw;
+    padding-top: 15px;
+    box-sizing: border-box;
+    border: 1px solid grey;
+   
+}
