@@ -11,10 +11,7 @@
         <link rel="stylesheet" href="index.css">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-        <script src="pouchdb-7.2.1.min.js"></script>
-        <script src="../node_modules/pouchdb/dist/pouchdb.js"></script>
-        <script src="./notes.js"></script>
-
+        <script src="pouchdb-7.2.1.min.js"></script>    
         <link rel="icon" href="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fs-media-cache-ak0.pinimg.com%2Foriginals%2F8b%2Fd2%2F07%2F8bd207881882ab8fe4a8f7b69c1331f8.png&f=1&nofb=1">
 
     </head>
@@ -22,9 +19,7 @@
 
     <body>
 
-
-
-        <div class="bd-example">
+        <div class="notes_area">
 
             <div class="row ">
                 <div class="col-3">
@@ -111,6 +106,7 @@
 
                 </div>
             </div>
+            
         </div>
 
         <script>
@@ -130,7 +126,15 @@
                 $("#editNote #note_content2").val( note_content );
 
             });
+            
+            //asynchronous function reacting to changes in the DB
+            db.changes({live: true, since: 'now', include_docs: true}).on('change', function (change) {
 
+
+                $( "#list-example" ).empty();
+                load();
+
+            }).on('error', console.log.bind(console));
 
 
             function timeConverter(UNIX_timestamp){
@@ -141,8 +145,6 @@
                 var day = a.getDate();
                 var hour = a.getHours();
                 var min = (a.getMinutes() < 10? '0' : '') + a.getMinutes();
-
-
                 var time = day + " " + month + ", " + hour + ":" + min ;
                 return time;
             }
@@ -171,8 +173,6 @@
 
             }
 
-
-
             function displayNote(key)
             {
                 try
@@ -197,7 +197,7 @@
                 return Object.keys(object).find(key => object[key][2] === value);
             }
 
-            function sortOnKeys(dict) {
+            function sort(dict) {
 
                 var sorted = [];
                 var iter = 0;
@@ -221,7 +221,7 @@
 
             function updateNavbar(dict)
             {
-                dict = sortOnKeys(dict); //sort by date & time
+                dict = sort(dict); //sort by date & time
 
                 for (key in dict)
                 {
@@ -288,16 +288,7 @@
 
             }
 
-            //asynchronous function reacting to changes in the DB
-            db.changes({live: true, since: 'now', include_docs: true}).on('change', function (change) {
-
-
-                $( "#list-example" ).empty();
-                load();
-
-            }).on('error', console.log.bind(console));
 
         </script>
-
     </body>
 </html>

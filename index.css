@@ -16,11 +16,6 @@
   background-color: aliceblue;
 }
 
-#list-example > a.selected
-{
-    background-color: yellow;
-}
-
 #list-example_date
 {
     font-size: 0.9em;
@@ -40,8 +35,7 @@
     text-align: left;
 }
 
-
-.bd-example
+.notes_area
 {
     position: relative;
     padding: 1.5rem;
@@ -76,6 +70,5 @@
     padding-left: 2vw;
     padding-top: 15px;
     box-sizing: border-box;
-    border: 1px solid grey;
-   
+    border: 1px solid grey;   
 }
